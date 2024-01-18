@@ -1,7 +1,7 @@
 <template>
     <link href='https://fonts.googleapis.com/css?family=Fredoka+One' rel='stylesheet'>
-    <div class="flex items-center justify-center">
-      <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 sm:max-w-sm w-full">
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 class="font-fredoka font-semibold grid justify-items-center text-[#4341C0] text-4xl">
           EchoConnect
         </h2>
