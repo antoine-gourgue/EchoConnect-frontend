@@ -10,13 +10,18 @@
     </div>
     <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
       <form class="space-y-6" action="#" method="POST">
-
         <LoginInput/>
         <LoginButton/>
         <div class="text-sm flex justify-center">
           <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-500">Mot de passe oublié?</a>
         </div>
       </form>
+      <p class="mt-4 text-center text-sm text-gray-500">
+        Vous n'avez pas de compte?
+        <router-link :to="{name: 'register'}" class="font-semibold leading-6 text-[#4341C0] hover:text-indigo-500">
+          Créer un compte
+        </router-link>
+      </p>
     </div>
   </div>
 </template>
