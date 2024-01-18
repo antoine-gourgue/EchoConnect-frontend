@@ -1,12 +1,6 @@
 <template>
   <div class="flex">
     <SideBar :users="users" @selectUser="selectUser" :groups="groups" @selectGroup="selectGroup" />
-
-    <div class="flex flex-col flex-1">
-      <div class="flex-grow" v-if="selectedUser || selectedGroup">
-        <ChatCard :selectedUser="selectedUser" :selectedGroup="selectedGroup"/>
-      </div>
-    </div>
   </div>
 </template>
 

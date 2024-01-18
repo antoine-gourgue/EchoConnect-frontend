@@ -20,9 +20,9 @@
         </button>
         <div v-if="showUsers" class="user-list">
           <div v-for="user in users" :key="user.id" class="mb-2">
-            <button @click="$emit('selectUser', user)" class="focus:outline-none">
+            <router-link :to="{ name: 'PrivateMessage', params: { userName: user.name }}">
               <img class="h-10 w-10 rounded-full" :src="user.image" :alt="user.name" />
-            </button>
+            </router-link>
           </div>
         </div>
         <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600" @click="toggleGroupsDisplay">
@@ -80,6 +80,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import router from '@/router';
 
 const props = defineProps({
   users: Array,
@@ -94,5 +95,8 @@ function toggleUsersDisplay() {
 }
 function toggleGroupsDisplay() {
   showGroups.value = !showGroups.value;
+}
+function goToPrivateMessage(userName) {
+  router.push({ name: 'PrivateMessage', params: { userName } });
 }
 </script>

@@ -1,4 +1,9 @@
 <template>
+  <div class="chat-card bg-white shadow rounded-lg overflow-hidden">
+    <div class="flex items-center p-4 border-b">
+      <img v-if="selectedUser" :src="selectedUser.image" alt="" class="w-10 h-10 rounded-full mr-4">
+      <h2 class="text-lg font-semibold">{{ selectedUser ? selectedUser.name : '' }}</h2>
+    </div>
       <div class="flex flex-col flex-auto h-full p-6">
         <div
             class="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-4"
@@ -270,6 +275,18 @@
           </div>
         </div>
       </div>
+  </div>
 </template>
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+
+export default defineComponent({
+  name: 'ChatCard',
+  props: {
+    selectedUser: {
+      type: Object as PropType<{ name: string; image: string }>,
+      required: true
+    }
+  }
+});
 </script>
