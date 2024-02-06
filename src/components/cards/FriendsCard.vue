@@ -4,19 +4,33 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue';
-import SideBar from "@/components/cards/SideBar.vue";
-import ChatCard from "@/components/cards/ChatCard.vue";
+import { ref, onMounted, onUnmounted } from 'vue';
+import { io } from 'socket.io-client';
 
-const users = [
-  // Remplacez ceci par vos données utilisateur
-  { id: 1, name: 'User 1', image: 'path/to/image1.jpg' },
-  { id: 2, name: 'User 2', image: 'path/to/image2.jpg' }
-];
+const socket = io('http://localhost:3001'); // Assurez-vous que l'URL correspond à votre configuration serveur
+const users = ref([]);
 
 const selectedUser = ref(null);
 
 function selectUser(user) {
   selectedUser.value = user;
 }
+
+// Écouter les mises à jour de la liste des utilisateurs connectés
+onMounted(() => {
+  socket.on('updateUserList', (updatedUsers) => {
+    console.log("Utilisateurs mis à jour reçus:", updatedUsers);
+    users.value = updatedUsers.map(user => ({
+      id: user.socketId,
+      name: user.username,
+      image: 'https://avatars.githubusercontent.com/u/35387401?v=4'
+    }));
+  });
+});
+
+// Nettoyer en se déconnectant
+onUnmounted(() => {
+  socket.off('updateUserList');
+});
+
 </script>

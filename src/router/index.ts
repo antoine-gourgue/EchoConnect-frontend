@@ -23,7 +23,7 @@ const router = createRouter({
             component: HomeView
         },
         {
-            path: '/private-message/:userName',
+            path: '/private-message/:userId',
             name: 'PrivateMessage',
             component: PrivateMessageView,
             props: true
