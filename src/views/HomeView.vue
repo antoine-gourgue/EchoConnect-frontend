@@ -6,13 +6,7 @@
     />
     <div class="flex-1">
       <div class="flex items-center justify-between p-4 bg-gray-100">
-        <h1 class="text-2xl font-fredoka">EchoConnect</h1>
-        <button class="rounded-full bg-gray-100" @click="toggleAvatarDisplay">
-          <img class="h-10 w-10 rounded-full" :src="currentUser.image" :alt="currentUser.username" />
-        </button>
-      </div>
-      <div class="p-4">
-        <h2 class="text-2xl font-semibold">Bienvenue, {{ currentUser }}</h2>
+        <h2 class="text-2xl font-semibold">Bienvenue, {{ currentUser.username }}</h2>
         <p class="text-gray-600">Vous êtes connecté en tant que {{ currentUser.username }}</p>
       </div>
     </div>

@@ -74,13 +74,15 @@ const users = ref([]); // Stocke les utilisateurs connectés
 const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
 const emit = defineEmits(['logout'])
 
+const currentUser = ref(JSON.parse(localStorage.getItem('user')));
+
+
 // Écouter les mises à jour de la liste des utilisateurs connectés
 onMounted(() => {
   socket.on('updateUserList', (updatedUsers) => {
-    users.value = updatedUsers;
-    console.log("Liste des utilisateurs mise à jour", users.value);
-    // Pour s'assurer que la liste est visible dès réception des données
-    showUsers.value = true;
+    // S'assurer que l'on filtre en utilisant le bon champ d'identifiant pour les utilisateurs
+    users.value = updatedUsers.filter(user => user.userId !== currentUser.value.id); // Assurez-vous que 'id' est le bon champ
+    console.log("Liste des utilisateurs mise à jour sans l'utilisateur courant", users.value);
   });
 });
 
