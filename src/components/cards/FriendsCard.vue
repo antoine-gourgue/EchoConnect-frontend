@@ -1,6 +1,6 @@
 <template>
   <div v-for="user in users" :key="user.id" class="user-image-container">
-    <img :src="user.image" @click="selectUser(user)" />
+    <img :src="user.image" @click="selectUser(user)"  alt={{user.name}}/>
   </div>
 </template>
 <script setup>
@@ -21,7 +21,7 @@ onMounted(() => {
   socket.on('updateUserList', (updatedUsers) => {
     console.log("Utilisateurs mis à jour reçus:", updatedUsers);
     users.value = updatedUsers.map(user => ({
-      id: user.socketId,
+      id: user.userId,
       name: user.username,
       image: 'https://avatars.githubusercontent.com/u/35387401?v=4'
     }));

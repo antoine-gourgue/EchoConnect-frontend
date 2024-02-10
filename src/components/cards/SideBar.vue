@@ -18,11 +18,12 @@
             </div>
           </div>
         </button>
-        <div v-if="showUsers" class="user-list">
-          <div v-for="user in users" :key="user.id" class="mb-2">
-            <router-link :to="{ name: 'PrivateMessage', params: { userName: user.name }}">
-              <img class="h-10 w-10 rounded-full" :src="user.image" :alt="user.name" />
-            </router-link>
+        <div v-if="true" class="user-list">
+          {{users?.length}}
+          <div v-for="user in users" :key="user.id" class="mb-2 flex items-center">
+            <img class="h-10 w-10 rounded-full" :src="user.image" :alt="user.name" />
+            <span v-if="user.isOnline" class="ml-2 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
+            <span class="ml-4">{{ user.name }}</span>
           </div>
         </div>
         <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600" @click="toggleUsersDisplay">
@@ -53,6 +54,13 @@
       </nav>
 
       <div class="flex flex-col items-center gap-y-4 py-10">
+        <button
+            class="group relative rounded-xl p-2 text-gray-600 hover:text-indigo-600"
+            @click="onLogout">
+          D
+        </button>
+
+
         <button class="group relative rounded-xl p-2 text-gray-600 hover:text-indigo-600" @click="toggleSettingsDisplay">
           <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
             <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
@@ -79,37 +87,37 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import io from 'socket.io-client';
-import router from '@/router';
 
-const socket = io('http://localhost:3001'); // Remplacez par l'URL de votre serveur Socket.io
+const socket = io('http://localhost:3001'); // Assurez-vous que l'URL correspond à votre serveur Socket.IO
+const users = ref([]); // Stocke les utilisateurs connectés
+const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
+const emit = defineEmits(['logout'])
 
-const users = ref([]);
-console.log('users list:', users);
-const showUsers = ref(false);
-
+// Écouter les mises à jour de la liste des utilisateurs connectés
 onMounted(() => {
-  // Écouter l'événement "updateUserList" du serveur Socket.io
   socket.on('updateUserList', (updatedUsers) => {
     users.value = updatedUsers;
+    console.log("Liste des utilisateurs mise à jour", users.value);
+    // Pour s'assurer que la liste est visible dès réception des données
+    showUsers.value = true;
   });
 });
 
-function goToPrivateMessage(user) {
-  if (user.id) {
-    // Naviguer vers la page de messages privés avec l'ID de l'utilisateur
-    router.push({ name: 'PrivateMessage', params: { userId: user.id } });
-  } else {
-    console.error("L'ID de l'utilisateur est requis pour naviguer vers PrivateMessage");
-  }
-}
+// Nettoyer lors du démontage du composant
+onUnmounted(() => {
+  socket.off('updateUserList');
+});
 
-
+// Fonction pour basculer l'affichage des utilisateurs
 function toggleUsersDisplay() {
   showUsers.value = !showUsers.value;
 }
-function toggleGroupsDisplay() {
-  showGroups.value = !showGroups.value;
+
+const onLogout = () => {
+  emit('logout')
 }
 </script>
+
+
