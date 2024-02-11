@@ -34,7 +34,7 @@
 
 
 <script setup>
-import {computed, ref} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3001');
@@ -53,6 +53,23 @@ socket.on('receiveMessage', message => {
   messages.value.push(message);
 });
 
+async function loadMessages() {
+  try {
+    const response = await fetch('http://localhost:3001/general-messages');
+    if (response.ok) {
+      const data = await response.json();
+      messages.value = data.data;
+    } else {
+      console.error('Failed to load messages:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error loading messages:', error);
+  }
+}
+
+
+onMounted(loadMessages);
+
 function formatDate(timestamp) {
   const date = new Date(timestamp);
   return date.toLocaleString('fr-FR', {
@@ -65,17 +82,40 @@ function formatDate(timestamp) {
   });
 }
 
-
-const sendMessage = () => {
+const sendMessage = async () => { // Marquez la fonction comme async
   if (newMessage.value.trim() !== '') {
     const messagePayload = {
       user: currentUser.value,
       text: newMessage.value,
       timestamp: Date.now()
     };
+
+    // Envoyer le message au serveur Socket.IO
     socket.emit('sendMessage', messagePayload);
+
+    try {
+      const response = await fetch('http://localhost:3001/general-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messagePayload),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(result.message); // Message de succès
+        // Ici, vous pouvez également mettre à jour l'UI en conséquence
+      } else {
+        // Gérer les réponses d'erreur de l'API
+        console.error("Erreur lors de l'envoi du message.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message :", error);
+    }
+
+    // Réinitialiser le champ de texte après l'envoi
     newMessage.value = '';
   }
 };
 </script>
-
