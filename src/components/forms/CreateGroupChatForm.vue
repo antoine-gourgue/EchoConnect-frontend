@@ -36,7 +36,7 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue';
 import { io } from 'socket.io-client';
-
+import {manageChatCommand} from "@/utils/chat-command";
 const socket = io('http://localhost:3001');
 const messages = ref([]);
 const newMessage = ref('');
@@ -84,11 +84,16 @@ function formatDate(timestamp) {
 
 const sendMessage = async () => { // Marquez la fonction comme async
   if (newMessage.value.trim() !== '') {
+    if (newMessage.value[0] === '/') {
+      manageChatCommand(newMessage.value);
+      return;
+    }
     const messagePayload = {
       user: currentUser.value,
       text: newMessage.value,
       timestamp: Date.now()
     };
+
 
     // Envoyer le message au serveur Socket.IO
     socket.emit('sendMessage', messagePayload);
