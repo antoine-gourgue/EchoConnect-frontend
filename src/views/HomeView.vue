@@ -28,16 +28,7 @@ const currentUser = computed(() => {
   return JSON.parse(localStorage.getItem('user'));
 });
 
-const userIsConnected = computed(() => {
-  const localStorageToken = localStorage.getItem('token');
-  return localStorageToken && currentUser.value;
-});
-
 onMounted(() => {
-  if(!userIsConnected.value){
-    router.push({ name: 'login' });
-  }
-
   socket.on('updateUserList', (updatedUsers) => {
     console.log("passe")
     users.value = updatedUsers.map(user => ({

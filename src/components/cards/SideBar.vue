@@ -41,6 +41,9 @@
             </div>
           </div>
         </button>
+        <button @click="goToCreateGroupChat" class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600">
+          <i class="fa-solid fa-comments"></i>
+        </button>
 <!--        <div v-if="showGroups" class="groups-list">-->
 <!--          <div v-for="group in groups" :key="group.id" class="mb-2">-->
 <!--            <button @click="$emit('selectGroup', group)" class="focus:outline-none">-->
@@ -68,6 +71,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import io from 'socket.io-client';
+import router from "@/router/index";
 
 const socket = io('http://localhost:3001'); // Assurez-vous que l'URL correspond à votre serveur Socket.IO
 const users = ref([]); // Stocke les utilisateurs connectés
@@ -99,6 +103,10 @@ function toggleUsersDisplay() {
 const onLogout = () => {
   emit('logout')
 }
+
+const goToCreateGroupChat = () => {
+  router.push({ name: 'GeneralChat' });
+};
 </script>
 
 
