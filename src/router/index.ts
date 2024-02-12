@@ -5,6 +5,7 @@ import HomeView from "@/views/HomeView.vue";
 import PrivateMessageView from "@/views/PrivateMessageView.vue";
 import CreateGroupChatForm from "@/components/forms/CreateGroupChatForm.vue";
 import io from "socket.io-client";
+import Profil from '@/views/ProfilView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +35,16 @@ const router = createRouter({
             path: '/general-chat',
             name: 'GeneralChat',
             component: CreateGroupChatForm
+        },
+        {
+            path: '/profil',
+            name: 'Profil',
+            component: Profil,
+            props: true
+        },
+        {
+            path: '/',
+            redirect: '/login'
         }
 
     ]

@@ -1,7 +1,8 @@
 <template>
-  <div class="flex flex-col h-screen">
-    <div class="flex-grow overflow-auto">
-      <div class="p-4 space-y-4 flex flex-col">
+  <div class="flex h-screen">
+    <SideBar class="h-full"/>
+    <div class="flex-grow overflow-auto h-full">
+      <div class="p-4 space-y-4 flex flex-col h-full overflow-y-auto justify-end"> <!-- Ajoutez ici justify-end -->
         <div v-for="message in messages" :key="message.id" :class="{'justify-end': isMessageFromCurrentUser(message.user.id), 'justify-start': !isMessageFromCurrentUser(message.user.id)}" class="flex ">
           <div class="max-w-[60%] rounded-lg p-2" :class="{'bg-indigo-500': isMessageFromCurrentUser(message.user.id), 'bg-gray-200': !isMessageFromCurrentUser(message.user.id)}">
             <div class="font-bold">{{ message.user.username }}</div>
@@ -11,31 +12,37 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="p-4">
-      <div class="flex space-x-2">
-        <input v-model="newMessage"
-               type="text" placeholder="Écrire un message..."
-               class= "border-gray-600 focus:border-indigo-700 outline-none block w-full rounded-md border-2 py-1.5 text-gray-900 shadow-sm
-             placeholder:text-gray-400 pl-[14px] sm:text-sm sm:leading-6"
-             @keydown.enter="sendMessage">
-        <button @click="sendMessage"
-                class="flex w-[150px] justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white
-                shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-                focus-visible:outline-indigo-600">
-          Envoyer
-        </button>
+        <div class="p-4">
+          <div class="flex space-x-2">
+            <input v-model="newMessage"
+                   type="text" placeholder="Écrire un message..."
+                   class= "border-gray-600 focus:border-indigo-700 outline-none block w-full rounded-md border-2 py-1.5 text-gray-900 shadow-sm
+                 placeholder:text-gray-400 pl-[14px] sm:text-sm sm:leading-6"
+                   @keydown.enter="sendMessage">
+            <button @click="sendMessage"
+                    class="flex w-[150px] justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white
+                    shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+                    focus-visible:outline-indigo-600">
+              Envoyer
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
 
+.flex-grow {
+  margin-left: 20px;
+}
+</style>
 
 <script setup>
 import {computed, onMounted, ref} from 'vue';
 import { io } from 'socket.io-client';
+import SideBar from '@/components/cards/SideBar.vue'
 
 const socket = io('http://localhost:3001');
 const messages = ref([]);
@@ -67,7 +74,6 @@ async function loadMessages() {
   }
 }
 
-
 onMounted(loadMessages);
 
 function formatDate(timestamp) {
@@ -82,7 +88,7 @@ function formatDate(timestamp) {
   });
 }
 
-const sendMessage = async () => { // Marquez la fonction comme async
+const sendMessage = async () => {
   if (newMessage.value.trim() !== '') {
     const messagePayload = {
       user: currentUser.value,
@@ -90,7 +96,6 @@ const sendMessage = async () => { // Marquez la fonction comme async
       timestamp: Date.now()
     };
 
-    // Envoyer le message au serveur Socket.IO
     socket.emit('sendMessage', messagePayload);
 
     try {
@@ -105,16 +110,12 @@ const sendMessage = async () => { // Marquez la fonction comme async
       if (response.ok) {
         const result = await response.json();
         console.log(result.message); // Message de succès
-        // Ici, vous pouvez également mettre à jour l'UI en conséquence
       } else {
-        // Gérer les réponses d'erreur de l'API
         console.error("Erreur lors de l'envoi du message.");
       }
     } catch (error) {
       console.error("Erreur lors de l'envoi du message :", error);
     }
-
-    // Réinitialiser le champ de texte après l'envoi
     newMessage.value = '';
   }
 };
