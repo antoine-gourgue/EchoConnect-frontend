@@ -49,29 +49,63 @@ const formatDate = (timestamp) => {
   });
 };
 
+const fetchPrivateMessages = async () => {
+  const senderId = currentUser.value.id;
+  const receiverId = route.params.userId; // Assurez-vous que ce paramètre est correctement transmis à votre route
+
+  try {
+    const response = await fetch(`http://localhost:3001/private-messages/${senderId}/${receiverId}`);
+    const data = await response.json();
+    if (response.ok) {
+      messages.value = data; // Supposons que l'API renvoie un tableau de messages
+    } else {
+      throw new Error(data.message || 'Could not fetch the messages');
+    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+  }
+};
+
 onMounted(() => {
-  // Écouter les messages privés reçus
+  fetchPrivateMessages();
   SocketService.socket.on('receivePrivateMessage', (message) => {
     messages.value.push({...message});
     console.log('Message reçu:', message);
   });
-})
-
+});
 // Fonction pour envoyer un message privé
-const sendPrivateMessage = () => {
+const sendPrivateMessage = async () => {
   if (newMessage.value.trim() !== '') {
     const messagePayload = {
       senderId: currentUser.value.id,
+      receiverId: route.params.userId, // Assurez-vous d'avoir le receiverId. Vous devrez peut-être ajuster cela selon votre logique d'application.
       senderUsername: currentUser.value.username,
       receiverUsername: route.params.username, // ou une valeur fixe si vous ne l'utilisez pas
       text: newMessage.value,
       timestamp: new Date().toISOString(),
     };
 
-    // Envoyer le message au serveur
-    SocketService.socket.emit('sendPrivateMessage', messagePayload);
-    console.log('Message envoyé:', messagePayload);
-    messages.value.push({...messagePayload});
+    // Envoyer le message à la base de données via votre API
+    try {
+      const response = await fetch('http://localhost:3001/private-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messagePayload),
+      });
+      const responseData = await response.json();
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to send the message');
+      }
+      console.log('Message saved:', responseData);
+      // Si l'enregistrement en DB est réussi, on peut également l'émettre via Socket.IO
+      SocketService.socket.emit('sendPrivateMessage', messagePayload);
+      messages.value.push({...messagePayload, ...responseData}); // Assume que la réponse inclut des données enrichies, comme un ID de message
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+
     newMessage.value = '';
   }
 };

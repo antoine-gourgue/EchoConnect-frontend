@@ -25,7 +25,7 @@ const router = createRouter({
             component: HomeView
         },
         {
-            path: '/private-message/:username',
+            path: '/private-message/:username/:userId',
             name: 'PrivateMessage',
             component: PrivateMessageCard,
             props: true
