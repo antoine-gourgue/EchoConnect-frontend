@@ -2,9 +2,12 @@
   <div class="flex flex-col h-screen">
     <div class="flex-grow overflow-auto p-4 space-y-4 flex flex-col">
       <div v-for="message in messages" :key="message.timestamp" class="flex" :class="{'justify-end': isMessageFromCurrentUser(message.senderUsername), 'justify-start': !isMessageFromCurrentUser(message.senderUsername)}">
-        <div :class="{'bg-indigo-500 text-white': isMessageFromCurrentUser(message.senderUsername), 'bg-gray-200 text-black': !isMessageFromCurrentUser(message.senderUsername)}" class="max-w-[60%] rounded-lg p-2">
+        <div :class="{
+        'bg-indigo-500 text-white': isMessageFromCurrentUser(message.senderUsername),
+        'bg-gray-200 text-black': !isMessageFromCurrentUser(message.senderUsername)
+      }" class="max-w-[60%] rounded-lg p-2">
           <div class="font-bold">{{ message.senderUsername || 'Unknown' }}</div>
-          <div class="break-words">{{ message }}</div>
+          <div class="break-words">{{ message.text }}</div>
           <div class="timestamp text-xs text-right mt-2">{{ formatDate(message.timestamp) }}</div>
         </div>
       </div>
@@ -18,12 +21,11 @@
 
 
 <script setup>
-import { ref, computed } from 'vue';
-import { io } from 'socket.io-client';
+import {ref, computed, onMounted} from 'vue';
 import { useRoute } from 'vue-router';
+import SocketService from "@/socket";
 
 // Initialisation de Socket.io
-const socket = io('http://localhost:3001');
 const messages = ref([]);
 const newMessage = ref('');
 
@@ -34,8 +36,9 @@ const route = useRoute();
 const currentUser = computed(() => JSON.parse(localStorage.getItem('user') || '{}'));
 
 // Fonction pour vérifier si le message provient de l'utilisateur courant
-const isMessageFromCurrentUser = (message) => {
-  return message.senderUsername === currentUser.value.username;
+const isMessageFromCurrentUser = (senderUsername) => {
+  // Assurez-vous que currentUser est correctement chargé et réactif
+  return senderUsername === currentUser.value.username;
 };
 
 // Fonction pour formater les timestamps des messages
@@ -46,11 +49,13 @@ const formatDate = (timestamp) => {
   });
 };
 
-// Écouter les messages privés reçus
-socket.on('receivePrivateMessage', (message) => {
-  messages.value.push(message);
-  console.log('Message reçu:', message);
-});
+onMounted(() => {
+  // Écouter les messages privés reçus
+  SocketService.socket.on('receivePrivateMessage', (message) => {
+    messages.value.push({...message});
+    console.log('Message reçu:', message);
+  });
+})
 
 // Fonction pour envoyer un message privé
 const sendPrivateMessage = () => {
@@ -64,8 +69,9 @@ const sendPrivateMessage = () => {
     };
 
     // Envoyer le message au serveur
-    socket.emit('sendPrivateMessage', messagePayload);
+    SocketService.socket.emit('sendPrivateMessage', messagePayload);
     console.log('Message envoyé:', messagePayload);
+    messages.value.push({...messagePayload});
     newMessage.value = '';
   }
 };

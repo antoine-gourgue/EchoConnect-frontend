@@ -70,10 +70,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import io from 'socket.io-client';
 import router from "@/router/index";
-
-const socket = io('http://localhost:3001'); // Assurez-vous que l'URL correspond à votre serveur Socket.IO
+import SocketService from "@/socket"; // Assurez-vous que l'URL correspond à votre serveur Socket.IO
 const users = ref([]); // Stocke les utilisateurs connectés
 const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
 const emit = defineEmits(['logout'])
@@ -83,7 +81,7 @@ const currentUser = ref(JSON.parse(localStorage.getItem('user')));
 
 // Écouter les mises à jour de la liste des utilisateurs connectés
 onMounted(() => {
-  socket.on('updateUserList', (updatedUsers) => {
+  SocketService.socket?.on('updateUserList', (updatedUsers) => {
     // S'assurer que l'on filtre en utilisant le bon champ d'identifiant pour les utilisateurs
     users.value = updatedUsers.filter(user => user.userId !== currentUser.value.id); // Assurez-vous que 'id' est le bon champ
     console.log("Liste des utilisateurs mise à jour sans l'utilisateur courant", users.value);
@@ -92,7 +90,7 @@ onMounted(() => {
 
 // Nettoyer lors du démontage du composant
 onUnmounted(() => {
-  socket.off('updateUserList');
+  SocketService.socket?.off('updateUserList');
 });
 
 // Fonction pour basculer l'affichage des utilisateurs

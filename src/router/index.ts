@@ -3,8 +3,8 @@ import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import HomeView from "@/views/HomeView.vue";
 import CreateGroupChatForm from "@/components/forms/CreateGroupChatForm.vue";
-import io from "socket.io-client";
 import PrivateMessageCard from "@/components/cards/PrivateMessageCard.vue";
+import SocketService from "@/socket";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,8 +50,8 @@ router.beforeEach((to, _from, next) => {
 
      // if current route is not public and user is logged in, socket emit joinConnectedUsers
     if(authRequired && userIsConnected){
-        const socket = io('http://localhost:3001');
-        socket.emit('joinConnectedUsers', connectedUser.id)
+        SocketService.init()
+        SocketService.socket?.emit('joinConnectedUsers', connectedUser.id)
         return next()
     }
 
