@@ -17,7 +17,7 @@
           </div>
         </button>
         <div v-if="true" class="user-list">
-          <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative">
+          <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative cursor-pointer" @click="goToPrivateMessage(user.username)">
             <img class="h-10 w-10 rounded-full" :src="user.image" :alt="user.name" />
             <span v-if="user.isOnline" class="ml-2 h-3 w-3 rounded-full bg-green-500 border-2 border-white absolute bottom-0 left-5"></span>
             <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
@@ -107,6 +107,11 @@ const onLogout = () => {
 const goToCreateGroupChat = () => {
   router.push({ name: 'GeneralChat' });
 };
+
+const goToPrivateMessage = (username) => {
+  router.push({ name: 'PrivateMessage', params: { username } });
+};
+
 </script>
 
 

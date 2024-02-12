@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import HomeView from "@/views/HomeView.vue";
-import PrivateMessageView from "@/views/PrivateMessageView.vue";
 import CreateGroupChatForm from "@/components/forms/CreateGroupChatForm.vue";
 import io from "socket.io-client";
+import PrivateMessageCard from "@/components/cards/PrivateMessageCard.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,9 +25,9 @@ const router = createRouter({
             component: HomeView
         },
         {
-            path: '/private-message/:userId',
+            path: '/private-message/:username',
             name: 'PrivateMessage',
-            component: PrivateMessageView,
+            component: PrivateMessageCard,
             props: true
         },
         {
