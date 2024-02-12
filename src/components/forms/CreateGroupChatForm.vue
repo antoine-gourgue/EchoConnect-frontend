@@ -3,8 +3,11 @@
     <SideBar />
   <div class="flex flex-col h-screen w-full">
       <div class="flex-grow overflow-auto p-4 space-y-4 flex flex-col" ref="generalMessageContainer">
-      <div v-for="message in messages" :key="message.id" :class="{'justify-end': isMessageFromCurrentUser(message.user.id), 'justify-start': !isMessageFromCurrentUser(message.user.id)}" class="flex ">
-          <div class="max-w-[60%] rounded-lg p-2" :class="{'bg-indigo-500': isMessageFromCurrentUser(message.user.id), 'bg-gray-200': !isMessageFromCurrentUser(message.user.id)}">
+      <div v-for="message in messages" :key="message.id" :class="{'justify-end': isMessageFromCurrentUser(message.user.id), 'justify-start': !isMessageFromCurrentUser(message.user.id)}" class="flex">
+          <div class="max-w-[60%] rounded-lg p-2"
+               :class="{
+            'bg-indigo-500 text-white': isMessageFromCurrentUser(message.user.id),
+            'bg-gray-200 text-black': !isMessageFromCurrentUser(message.user.id)}">
             <div class="font-bold">{{ message.user.username }}</div>
             <div class="break-words">{{ message.text }}</div>
             <div class="timestamp text-xs text-right mt-2">
