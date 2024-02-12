@@ -1,6 +1,8 @@
 <template>
-  <div class="flex flex-col h-screen">
-    <div class="flex-grow overflow-auto p-4 space-y-4 flex flex-col">
+  <div class="flex h-screen">
+    <SideBar />
+  <div class="flex flex-col h-screen w-full">
+    <div class="flex-grow overflow-auto p-4 space-y-4 flex flex-col" ref="messageContainer">
       <div v-for="message in messages" :key="message.timestamp" class="flex" :class="{'justify-end': isMessageFromCurrentUser(message.senderUsername), 'justify-start': !isMessageFromCurrentUser(message.senderUsername)}">
         <div :class="{
         'bg-indigo-500 text-white': isMessageFromCurrentUser(message.senderUsername),
@@ -17,15 +19,17 @@
       <button @click="sendPrivateMessage" class="flex w-[150px] justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Envoyer</button>
     </div>
   </div>
+    </div>
 </template>
 
 
 <script setup>
-import {ref, computed, onMounted} from 'vue';
+import {ref, computed, onMounted, watch, nextTick} from 'vue';
 import { useRoute } from 'vue-router';
 import SocketService from "@/socket";
+import SideBar from "@/components/cards/SideBar.vue";
 
-// Initialisation de Socket.io
+const messageContainer = ref(null);
 const messages = ref([]);
 const newMessage = ref('');
 
@@ -65,6 +69,21 @@ const fetchPrivateMessages = async () => {
     console.error('Fetch error:', error);
   }
 };
+
+watch(messages, () => {
+  nextTick(() => {
+    if (messageContainer.value) {
+      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+    }
+  });
+}, { deep: true });
+
+watch(() => route.params, async (newParams) => {
+  // Assurez-vous que cette logique est exécutée uniquement si les paramètres pertinents pour charger les messages sont présents
+  if (newParams.userId) {
+    await fetchPrivateMessages();
+  }
+}, { deep: true });
 
 onMounted(() => {
   fetchPrivateMessages();
@@ -110,3 +129,23 @@ const sendPrivateMessage = async () => {
   }
 };
 </script>
+
+<style scoped>
+.flex-grow::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.flex-grow::-webkit-scrollbar-track {
+  @apply bg-gray-200;
+}
+
+.flex-grow::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 hover:bg-gray-500;
+}
+
+/* Pour Firefox */
+.flex-grow {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.gray.400') theme('colors.gray.200');
+}
+</style>

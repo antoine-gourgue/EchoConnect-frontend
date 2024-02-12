@@ -1,8 +1,9 @@
 <template>
-  <div class="flex flex-col h-screen">
-    <div class="flex-grow overflow-auto">
-      <div class="p-4 space-y-4 flex flex-col">
-        <div v-for="message in messages" :key="message.id" :class="{'justify-end': isMessageFromCurrentUser(message.user.id), 'justify-start': !isMessageFromCurrentUser(message.user.id)}" class="flex ">
+  <div class="flex h-screen">
+    <SideBar />
+  <div class="flex flex-col h-screen w-full">
+      <div class="flex-grow overflow-auto p-4 space-y-4 flex flex-col" ref="generalMessageContainer">
+      <div v-for="message in messages" :key="message.id" :class="{'justify-end': isMessageFromCurrentUser(message.user.id), 'justify-start': !isMessageFromCurrentUser(message.user.id)}" class="flex ">
           <div class="max-w-[60%] rounded-lg p-2" :class="{'bg-indigo-500': isMessageFromCurrentUser(message.user.id), 'bg-gray-200': !isMessageFromCurrentUser(message.user.id)}">
             <div class="font-bold">{{ message.user.username }}</div>
             <div class="break-words">{{ message.text }}</div>
@@ -12,7 +13,6 @@
           </div>
         </div>
       </div>
-    </div>
     <div class="p-4">
       <div class="flex space-x-2">
         <input v-model="newMessage"
@@ -29,15 +29,18 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 
 
 <script setup>
-import {computed, onMounted, ref} from 'vue';
-import { io } from 'socket.io-client';
+import {computed, nextTick, onMounted, ref, watch} from 'vue';
 import {manageChatCommand} from "@/utils/chat-command";
-const socket = io('http://localhost:3001');
+import SideBar from "@/components/cards/SideBar.vue";
+import SocketService from "@/socket";
+
+const generalMessageContainer = ref(null);
 const messages = ref([]);
 const newMessage = ref('');
 
@@ -45,11 +48,12 @@ const currentUser = computed(() => {
   return JSON.parse(localStorage.getItem('user'));
 });
 
+
 const isMessageFromCurrentUser = (messageUserId) => {
   return messageUserId === currentUser.value.id;
 };
 
-socket.on('receiveMessage', message => {
+SocketService.socket?.on('receiveMessage', message => {
   messages.value.push(message);
 });
 
@@ -66,6 +70,15 @@ async function loadMessages() {
     console.error('Error loading messages:', error);
   }
 }
+
+
+watch(messages, () => {
+  nextTick(() => {
+    if (generalMessageContainer.value) {
+      generalMessageContainer.value.scrollTop = generalMessageContainer.value.scrollHeight;
+    }
+  });
+}, { deep: true });
 
 
 onMounted(loadMessages);
@@ -96,7 +109,7 @@ const sendMessage = async () => { // Marquez la fonction comme async
 
 
     // Envoyer le message au serveur Socket.IO
-    socket.emit('sendMessage', messagePayload);
+    SocketService.socket?.emit('sendMessage', messagePayload);
 
     try {
       const response = await fetch('http://localhost:3001/general-messages', {
