@@ -60,7 +60,7 @@
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
         <button class="mt-2 rounded-full bg-gray-100" @click="toggleAvatarDisplay">
-          <img class="h-10 w-10 rounded-full" src="https://avatars.githubusercontent.com/u/35387401?v=4" alt="" />
+          <img class="h-10 w-10 rounded-full" :src="currentUser.image" :alt="currentUser.name" />
         </button>
       </div>
 
@@ -76,7 +76,8 @@ const users = ref([]); // Stocke les utilisateurs connectés
 const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
 const emit = defineEmits(['logout'])
 
-const currentUser = ref(JSON.parse(localStorage.getItem('user')));
+const currentUser = ref(JSON.parse(localStorage.getItem('user'|| '{}')));
+console.log('currentUser', currentUser.value)
 
 
 // Écouter les mises à jour de la liste des utilisateurs connectés
