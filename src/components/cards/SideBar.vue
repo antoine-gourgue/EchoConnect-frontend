@@ -59,7 +59,7 @@
             @click="onLogout">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
-        <button class="mt-2 rounded-full bg-gray-100" @click="toggleAvatarDisplay">
+        <button class="mt-2 rounded-full bg-gray-100" @click="navigateToProfile">
           <img class="h-10 w-10 rounded-full" src="https://avatars.githubusercontent.com/u/35387401?v=4" alt="" />
         </button>
       </div>
@@ -103,6 +103,9 @@ function toggleUsersDisplay() {
 const onLogout = () => {
   emit('logout')
 }
+const navigateToProfile = () => {
+  router.push({ name: 'Profil' });
+};
 
 const goToCreateGroupChat = () => {
   router.push({ name: 'GeneralChat' });
