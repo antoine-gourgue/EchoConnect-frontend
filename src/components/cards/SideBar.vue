@@ -41,9 +41,47 @@
             </div>
           </div>
         </button>
+
+        <div v-if="true" class="user-list">
+          <div v-for="channel in channels" :key="channel.id" class="group mb-2 flex items-center relative cursor-pointer" @click="goToChannel(channel.name, channel._id)">
+            <p class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+              {{ channel.name.charAt(0).toUpperCase() }}
+            </p>
+            <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
+              <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
+                <div class="absolute inset-0 -left-1 flex items-center">
+                  <div class="h-2 w-2 rotate-45 bg-white"></div>
+                </div>
+                {{ channel.name}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button @click="createChannel" class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600">
+          <i class="fa-solid fa-plus"></i>
+          <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
+            <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
+              <div class="absolute inset-0 -left-1 flex items-center">
+                <div class="h-2 w-2 rotate-45 bg-white"></div>
+              </div>
+              Création de groupe
+            </div>
+          </div>
+        </button>
+
         <button @click="goToCreateGroupChat" class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600">
           <i class="fa-solid fa-comments"></i>
+          <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
+            <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
+              <div class="absolute inset-0 -left-1 flex items-center">
+                <div class="h-2 w-2 rotate-45 bg-white"></div>
+              </div>
+              Groupe géneral
+            </div>
+          </div>
         </button>
+
 <!--        <div v-if="showGroups" class="groups-list">-->
 <!--          <div v-for="group in groups" :key="group.id" class="mb-2">-->
 <!--            <button @click="$emit('selectGroup', group)" class="focus:outline-none">-->
@@ -71,7 +109,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import router from "@/router/index";
-import SocketService from "@/socket"; // Assurez-vous que l'URL correspond à votre serveur Socket.IO
+import SocketService from "@/socket";
+import axios from "axios"; // Assurez-vous que l'URL correspond à votre serveur Socket.IO
+const channels = ref([]);
 const users = ref([]); // Stocke les utilisateurs connectés
 const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
 const emit = defineEmits(['logout'])
@@ -87,11 +127,16 @@ onMounted(() => {
     users.value = updatedUsers.filter(user => user.userId !== currentUser.value.id); // Assurez-vous que 'id' est le bon champ
     console.log("Liste des utilisateurs mise à jour sans l'utilisateur courant", users.value);
   });
+
+  fetchUserChannels();
+
 });
 
 // Nettoyer lors du démontage du composant
 onUnmounted(() => {
   SocketService.socket?.off('updateUserList');
+
+
 });
 
 // Fonction pour basculer l'affichage des utilisateurs
@@ -103,14 +148,74 @@ const onLogout = () => {
   emit('logout')
 }
 
-const goToCreateGroupChat = () => {
-  router.push({ name: 'GeneralChat' });
-};
 
 const goToPrivateMessage = (username,userId) => {
   router.push({ name: 'PrivateMessage', params: { username, userId } });
 };
 
+const goToChannel = (channelName, id) => {
+  if (!channelName) {
+    console.error("Le nom du canal est manquant");
+    return; // Empêcher la navigation si le nom du canal est manquant
+  }
+  router.push({ name: 'Channel', params: { channelName, id } });
+};
+
+
+const createChannel = async () => {
+  const channelName = prompt("Entrez le nom du nouveau canal :");
+  if (!channelName) return; // Quitte la fonction si aucun nom n'est fourni
+
+  try {
+
+    console.log('Envoi des données du canal :', {
+      name: channelName,
+      createdBy: currentUser.value.id,
+      members: [currentUser.value.id],
+      imageUrl: `https://picsum.photos/200/300?random=${Math.floor(Math.random() * 1000)}`
+    });
+    // Envoie une requête POST à l'API pour créer un nouveau canal
+    const response = await axios.post('http://localhost:3001/channels/create', {
+      name: channelName,
+      createdBy: currentUser.value.id, // Assurez-vous que cet ID est correct et existe dans votre DB
+      members: [currentUser.value.id], // Initialiser avec le créateur comme premier membre
+      // Utilisez une image aléatoire pour l'exemple, remplacez par votre logique si nécessaire
+      imageUrl: `https://picsum.photos/200/300?random=${Math.floor(Math.random() * 1000)}`
+    });
+
+
+
+    // Ajoute le canal créé à la liste des canaux locaux pour mise à jour de l'UI
+    channels.value.push(response.data);
+    console.log('Canal créé avec succès:', response.data);
+    alert(`Canal créé : ${response.data.name}`);
+  } catch (error) {
+    console.error("Erreur lors de la création du canal:", error);
+    alert(`Erreur lors de la création du canal: ${error.response?.data?.message || error.message}`);
+  }
+};
+
+
+// Écouter la réponse de la création du canal
+SocketService.socket?.on('channelCreated', (data) => {
+  channels.value.push(data);
+  console.log('channels', channels.value)
+  alert(`Canal créé : ${data.channelName}`);
+});
+
+SocketService.socket?.on('channelCreationError', (error) => {
+  alert(`Erreur lors de la création du canal : ${error}`);
+});
+
+
+const fetchUserChannels = async () => {
+  try {
+    const { data } = await axios.get(`http://localhost:3001/channels/user/${currentUser.value.id}`);
+    channels.value = data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des canaux de l'utilisateur", error);
+  }
+};
 </script>
 
 

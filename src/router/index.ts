@@ -5,6 +5,7 @@ import HomeView from "@/views/HomeView.vue";
 import CreateGroupChatForm from "@/components/forms/CreateGroupChatForm.vue";
 import PrivateMessageCard from "@/components/cards/PrivateMessageCard.vue";
 import SocketService from "@/socket";
+import ChannelView from "@/views/ChannelView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +35,12 @@ const router = createRouter({
             path: '/general-chat',
             name: 'GeneralChat',
             component: CreateGroupChatForm
+        },
+        {
+            path: '/chanel/:channelName/:id',
+            name: 'Channel',
+            component: ChannelView,
+            props: true
         }
 
     ]
