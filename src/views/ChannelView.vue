@@ -2,8 +2,16 @@
   <div class="flex h-screen">
     <SideBar />
     <div class="flex flex-col h-screen w-full">
+      <!-- Header du Canal avec bouton d'invitation -->
+      <div class="flex h-[4.5rem] items-center justify-between w-full border-b border-gray-200 p-2">
+        <h1 class="text-xl font-bold">{{ channelName }}</h1>
+        <button @click="inviteUser" class="flex  justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <i class="fa-solid fa-user-plus"></i>
+        </button>
+      </div>
+
       <!-- Zone d'affichage des messages -->
-      <div class="flex-grow overflow-auto p-4 space-y-4" :ref="messageContainerRef">
+      <div class="flex-grow overflow-auto p-4 space-y-4" ref="messageContainerRef">
         <div v-for="message in messages" :key="message.timestamp" class="flex" :class="{'justify-end': isMessageFromCurrentUser(message.senderId), 'justify-start': !isMessageFromCurrentUser(message.senderId)}">
           <div :class="{
                 'bg-indigo-500 text-white': isMessageFromCurrentUser(message.senderId),
@@ -32,6 +40,7 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import SocketService from '@/socket';
 import SideBar from "@/components/cards/SideBar.vue";
+import Swal from "sweetalert2";
 
 const route = useRoute();
 const messageContainerRef = ref(null);
@@ -92,4 +101,29 @@ const formatDate = (timestamp) => {
 onMounted(() => {
   SocketService.socket.emit('joinChannel', { channelId: channelId.value, userId: currentUser.value.id });
 });
+
+const inviteUser = async () => {
+  const { value: userIdToInvite } = await Swal.fire({
+    title: 'Entrez l\'ID de l\'utilisateur à inviter',
+    input: 'text',
+    inputPlaceholder: 'ID de l\'utilisateur',
+    showCancelButton: true,
+  });
+
+  if (userIdToInvite) {
+    try {
+      // Envoie une invitation via Socket.io
+      SocketService.socket.emit('inviteToChannel', {
+        channelId: channelId.value,
+        userIdToInvite,
+        inviterId: currentUser.value.id,
+      });
+
+      await Swal.fire('Invitation envoyée', 'L\'utilisateur a été invité avec succès.', 'success');
+    } catch (error) {
+      console.error('Erreur lors de l\'invitation de l\'utilisateur:', error);
+      await Swal.fire('Erreur', 'Une erreur est survenue lors de l\'invitation.', 'error');
+    }
+  }
+};
 </script>
