@@ -108,6 +108,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import Swal from 'sweetalert2';
 import router from "@/router/index";
 import SocketService from "@/socket";
 import axios from "axios"; // Assurez-vous que l'URL correspond à votre serveur Socket.IO
@@ -163,35 +164,32 @@ const goToChannel = (channelName, id) => {
 
 
 const createChannel = async () => {
-  const channelName = prompt("Entrez le nom du nouveau canal :");
-  if (!channelName) return; // Quitte la fonction si aucun nom n'est fourni
+  const { value: channelName } = await Swal.fire({
+    title: 'Entrez le nom du nouveau canal',
+    input: 'text',
+    inputPlaceholder: 'Nom du canal',
+    showCancelButton: true,
+    inputValidator: (value) => {
+      if (!value) {
+        return 'Vous devez entrer un nom !';
+      }
+    }
+  });
 
-  try {
-
-    console.log('Envoi des données du canal :', {
-      name: channelName,
-      createdBy: currentUser.value.id,
-      members: [currentUser.value.id],
-      imageUrl: `https://picsum.photos/200/300?random=${Math.floor(Math.random() * 1000)}`
-    });
-    // Envoie une requête POST à l'API pour créer un nouveau canal
-    const response = await axios.post('http://localhost:3001/channels/create', {
-      name: channelName,
-      createdBy: currentUser.value.id, // Assurez-vous que cet ID est correct et existe dans votre DB
-      members: [currentUser.value.id], // Initialiser avec le créateur comme premier membre
-      // Utilisez une image aléatoire pour l'exemple, remplacez par votre logique si nécessaire
-      imageUrl: `https://picsum.photos/200/300?random=${Math.floor(Math.random() * 1000)}`
-    });
-
-
-
-    // Ajoute le canal créé à la liste des canaux locaux pour mise à jour de l'UI
-    channels.value.push(response.data);
-    console.log('Canal créé avec succès:', response.data);
-    alert(`Canal créé : ${response.data.name}`);
-  } catch (error) {
-    console.error("Erreur lors de la création du canal:", error);
-    alert(`Erreur lors de la création du canal: ${error.response?.data?.message || error.message}`);
+  if (channelName) {
+    try {
+      const response = await axios.post('http://localhost:3001/channels/create', {
+        name: channelName,
+        createdBy: currentUser.value.id,
+        members: [currentUser.value.id],
+        imageUrl: `https://picsum.photos/200/300?random=${Math.floor(Math.random() * 1000)}`
+      });
+      channels.value.push(response.data); // Assumer que l'API renvoie le canal créé
+      await Swal.fire('Créé !', `Canal créé : ${response.data.name}`, 'success');
+    } catch (error) {
+      console.error('Erreur lors de la création du canal:', error);
+      await Swal.fire('Erreur !', `Erreur lors de la création du canal: ${error.message}`, 'error');
+    }
   }
 };
 
@@ -200,12 +198,11 @@ const createChannel = async () => {
 SocketService.socket?.on('channelCreated', (data) => {
   channels.value.push(data);
   console.log('channels', channels.value)
-  alert(`Canal créé : ${data.channelName}`);
+  Swal.fire('Nouveau canal !', `Un nouveau canal a été créé: ${data.name}`, 'info');
 });
 
 SocketService.socket?.on('channelCreationError', (error) => {
-  alert(`Erreur lors de la création du canal : ${error}`);
-});
+  Swal.fire('Erreur de canal', `Erreur lors de la création d'un canal: ${error}`, 'error');});
 
 
 const fetchUserChannels = async () => {
