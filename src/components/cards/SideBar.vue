@@ -213,6 +213,9 @@ const fetchUserChannels = async () => {
     console.error("Erreur lors de la récupération des canaux de l'utilisateur", error);
   }
 };
+const goToCreateGroupChat = () => {
+  router.push({ name: 'GeneralChat' });
+};
 </script>
 
 
