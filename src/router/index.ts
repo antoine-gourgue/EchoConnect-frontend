@@ -2,10 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import HomeView from "@/views/HomeView.vue";
-import PrivateMessageView from "@/views/PrivateMessageView.vue";
 import CreateGroupChatForm from "@/components/forms/CreateGroupChatForm.vue";
 import io from "socket.io-client";
 import Profil from '@/views/ProfilView.vue'
+import PrivateMessageCard from "@/components/cards/PrivateMessageCard.vue";
+import SocketService from "@/socket";
+import ChannelView from "@/views/ChannelView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,15 +28,21 @@ const router = createRouter({
             component: HomeView
         },
         {
-            path: '/private-message/:userId',
+            path: '/private-message/:username/:userId',
             name: 'PrivateMessage',
-            component: PrivateMessageView,
+            component: PrivateMessageCard,
             props: true
         },
         {
             path: '/general-chat',
             name: 'GeneralChat',
             component: CreateGroupChatForm
+        },
+        {
+            path: '/chanel/:channelName/:id',
+            name: 'Channel',
+            component: ChannelView,
+            props: true
         },
         {
             path: '/profil',
@@ -61,8 +69,8 @@ router.beforeEach((to, _from, next) => {
 
      // if current route is not public and user is logged in, socket emit joinConnectedUsers
     if(authRequired && userIsConnected){
-        const socket = io('http://localhost:3001');
-        socket.emit('joinConnectedUsers', connectedUser.id)
+        SocketService.init()
+        SocketService.socket?.emit('joinConnectedUsers', connectedUser.id)
         return next()
     }
 

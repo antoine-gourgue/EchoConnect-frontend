@@ -5,9 +5,8 @@
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3001'); // Assurez-vous que l'URL correspond à votre configuration serveur
+import SocketService from "@/socket";
+ // Assurez-vous que l'URL correspond à votre configuration serveur
 const users = ref([]);
 
 const selectedUser = ref(null);
@@ -18,7 +17,7 @@ function selectUser(user) {
 
 // Écouter les mises à jour de la liste des utilisateurs connectés
 onMounted(() => {
-  socket.on('updateUserList', (updatedUsers) => {
+  SocketService.socket?.on('updateUserList', (updatedUsers) => {
     console.log("Utilisateurs mis à jour reçus:", updatedUsers);
     users.value = updatedUsers.map(user => ({
       id: user.userId,
@@ -30,7 +29,7 @@ onMounted(() => {
 
 // Nettoyer en se déconnectant
 onUnmounted(() => {
-  socket.off('updateUserList');
+  SocketService.socket?.off('updateUserList');
 });
 
 </script>

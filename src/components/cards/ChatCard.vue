@@ -102,9 +102,7 @@
 </template>
 <script setup>
 import {computed, ref} from 'vue';
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3001');
+import SocketService from "@/socket";
 const messages = ref([]);
 const newMessage = ref('');
 
@@ -113,7 +111,7 @@ const currentUser = computed(() => {
 });
 
 
-socket.on('receiveMessage', message => {
+SocketService.socket?.on('receiveMessage', message => {
   messages.value.push(message);
 });
 
@@ -124,7 +122,7 @@ const sendMessage = () => {
       text: newMessage.value,
       timestamp: Date.now()
     };
-    socket.emit('sendMessage', messagePayload);
+    SocketService.socket?.emit('sendMessage', messagePayload);
     newMessage.value = '';
   }
 };
