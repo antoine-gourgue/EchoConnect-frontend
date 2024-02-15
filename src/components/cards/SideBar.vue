@@ -2,18 +2,18 @@
   <div class="flex bg-gray-100 text-gray-900">
     <aside class="flex h-screen w-20 flex-col items-center border-r border-gray-200 bg-white">
       <div class="flex h-[4.5rem] w-full items-center justify-center border-b border-gray-200 p-2">
-        <img src="/EchoConnectLogo.png" />
+        <img src="/EchoConnectLogo.png" alt="Echo Connect Logo" />
       </div>
       <nav class="flex flex-1 flex-col gap-y-4 pt-10">
         <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600 " @click="toggleUsersDisplay">
           <i class="fa-solid fa-message"></i>
           <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
-            <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
-              <div class="absolute inset-0 -left-1 flex items-center">
-                <div class="h-2 w-2 rotate-45 bg-white"></div>
-              </div>
-              Messages privés
-            </div>
+  <span class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
+    <span class="absolute inset-0 -left-1 flex items-center">
+      <span class="h-2 w-2 rotate-45 bg-white"></span>
+    </span>
+    Messages privés
+  </span>
           </div>
         </button>
         <div v-if="true" class="user-list">
@@ -97,8 +97,9 @@
             @click="onLogout">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
-        <button class="mt-2 rounded-full bg-gray-100" @click="toggleAvatarDisplay">
+<!--        <button class="mt-2 rounded-full bg-gray-100" @click="toggleAvatarDisplay">
           <img class="h-10 w-10 rounded-full" :src="currentUser.image" :alt="currentUser.name" />
+        </button>-->
         <button class="mt-2 rounded-full bg-gray-100" @click="navigateToProfile">
           <img class="h-10 w-10 rounded-full" src="https://avatars.githubusercontent.com/u/35387401?v=4" alt="" />
         </button>
@@ -113,9 +114,9 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import Swal from 'sweetalert2';
 import router from "@/router/index";
 import SocketService from "@/socket";
-import axios from "axios"; // Assurez-vous que l'URL correspond à votre serveur Socket.IO
+import axios from "axios";
 const channels = ref([]);
-const users = ref([]); // Stocke les utilisateurs connectés
+const users = ref([]);
 const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
 const emit = defineEmits(['logout'])
 
