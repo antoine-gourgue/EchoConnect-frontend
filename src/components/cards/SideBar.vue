@@ -42,8 +42,13 @@
           </div>
         </button>
 
-        <div v-if="true" class="user-list">
-          <div v-for="channel in channels" :key="channel.id" class="group mb-2 flex items-center relative cursor-pointer" @click="goToChannel(channel.name, channel._id)">
+        <div class="user-list">
+          <RouterLink
+              v-for="channel in channels"
+              :key="channel.id"
+              class="group mb-2 flex items-center relative cursor-pointer"
+              :to="{ name: 'Channel', params: { channelName: channel.name, channelId: channel.id } }"
+          >
             <p class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
               {{ channel.name.charAt(0).toUpperCase() }}
             </p>
@@ -55,7 +60,7 @@
                 {{ channel.name}}
               </div>
             </div>
-          </div>
+          </RouterLink>
         </div>
 
         <button @click="createChannel" class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600">
@@ -152,20 +157,6 @@ const onLogout = () => {
 
 const goToPrivateMessage = (username,userId) => {
   router.push({ name: 'PrivateMessage', params: { username, userId } });
-};
-
-const goToChannel = (channelName, channelId) => {
-  if (!channelName) {
-    console.error("Le nom du canal est manquant");
-    return;
-  }
-
-  // Effectuez la navigation vers la même route, mais avec un paramètre différent
-  router.push({ name: 'Channel', params: { channelName, channelId } }).catch(err => {
-    if (err.name !== 'NavigationDuplicated') {
-      throw err;
-    }
-  });
 };
 
 

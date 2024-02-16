@@ -4,7 +4,9 @@
     <div class="flex flex-col h-screen w-full">
       <!-- Header du Canal avec bouton d'invitation -->
       <div class="flex h-[4.5rem] items-center justify-between w-full border-b border-gray-200 p-2">
-        <h1 class="text-xl font-bold">{{ channelName }}</h1>
+        <h1 class="text-xl font-bold">
+          {{ channelName }}
+        </h1>
         <button @click="addUser"
                 class="flex  justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
           <i class="fa-solid fa-user-plus"></i>
@@ -43,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, nextTick, watch, computed, onMounted} from 'vue';
+import { ref, nextTick, watch, computed } from 'vue';
 import {useRoute} from 'vue-router';
 import SocketService from '@/socket';
 import SideBar from "@/components/cards/SideBar.vue";
@@ -71,7 +73,9 @@ const newMessage = ref('');
 // Récupération de l'utilisateur actuel depuis localStorage
 const currentUser = ref(JSON.parse(localStorage.getItem('user') || '{}'));
 
-const channelName = ref(route.params.channelName);
+const channelName = computed(() => {
+  return route.params.channelName?.toString() || '';
+})
 const channelId: ComputedRef<string> = computed(() => {
   return route.params.channelId?.toString() || '';
 })
@@ -109,6 +113,7 @@ const sendMessage = async () => {
 
     // Émettre le message via Socket.io pour l'envoyer en temps réel
     if (SocketService.socket) {
+      console.log('sendChannelMessage', message)
       SocketService.socket.emit('sendChannelMessage', message);
     }
     newMessage.value = '';
@@ -119,16 +124,15 @@ const sendMessage = async () => {
   }
 };
 
-
-if (SocketService.socket) {
-  SocketService.socket.on('receiveChannelMessage', (message) => {
-    if (message.channelId === channelId.value) {
+const onReceiveChannelMessage = () => {
+  if (SocketService.socket) {
+    SocketService.socket.on('receiveChannelMessage', (message) => {
       console.log('receiveChannelMessage', message)
       messages.value.push(message);
       scrollToBottom();
-    }
-  });
-}
+    });
+  }
+};
 
 const formatDate = (timestamp) => {
   return new Date(timestamp).toLocaleString('fr-FR', {
@@ -216,6 +220,7 @@ watch(channelId, async (newChannelId: string) => {
 
   await nextTick(() => {
     scrollToBottom()
+    onReceiveChannelMessage()
   });
 }, {immediate: true})
 </script>
