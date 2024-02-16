@@ -126,7 +126,7 @@ onMounted(() => {
   SocketService.socket?.on('updateUserList', (updatedUsers) => {
     // S'assurer que l'on filtre en utilisant le bon champ d'identifiant pour les utilisateurs
     users.value = updatedUsers.filter(user => user.userId !== currentUser.value.id); // Assurez-vous que 'id' est le bon champ
-    console.log("Liste des utilisateurs mise à jour sans l'utilisateur courant", users.value);
+    // console.log("Liste des utilisateurs mise à jour sans l'utilisateur courant", users.value);
   });
 
   fetchUserChannels();
@@ -154,12 +154,18 @@ const goToPrivateMessage = (username,userId) => {
   router.push({ name: 'PrivateMessage', params: { username, userId } });
 };
 
-const goToChannel = (channelName, id) => {
+const goToChannel = (channelName, channelId) => {
   if (!channelName) {
     console.error("Le nom du canal est manquant");
-    return; // Empêcher la navigation si le nom du canal est manquant
+    return;
   }
-  router.push({ name: 'Channel', params: { channelName, id } });
+
+  // Effectuez la navigation vers la même route, mais avec un paramètre différent
+  router.push({ name: 'Channel', params: { channelName, channelId } }).catch(err => {
+    if (err.name !== 'NavigationDuplicated') {
+      throw err;
+    }
+  });
 };
 
 
@@ -215,6 +221,7 @@ const fetchUserChannels = async () => {
 };
 const goToCreateGroupChat = () => {
   router.push({ name: 'GeneralChat' });
+
 };
 </script>
 
