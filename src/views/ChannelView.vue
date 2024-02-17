@@ -61,6 +61,7 @@ import SideBar from "@/components/cards/SideBar.vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 import type {ComputedRef, Ref} from "vue";
+import router from "@/router";
 
 type Message = {
   channelId: string;
@@ -235,7 +236,7 @@ const deleteChannel = async () => {
             'Le canal a été supprimé.',
             'success'
         );
-        // Redirection ou mise à jour de l'interface ici
+        await router.push({name: 'home'});
       } catch (error) {
         console.error("Erreur lors de la suppression du canal:", error);
         await Swal.fire({
