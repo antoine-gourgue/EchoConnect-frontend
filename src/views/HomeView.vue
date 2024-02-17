@@ -5,7 +5,7 @@
         @logout="onLogout"
     />
     <div class="flex-1">
-      <div class="flex items-center justify-between p-4 bg-gray-100">
+      <div class="flex items-center justify-between p-4 bg-gray-100 h-[4.5rem]">
         <h2 class="text-2xl font-semibold">Bienvenue, {{ currentUser.username }}</h2>
         <p class="text-gray-600">Vous êtes connecté en tant que {{ currentUser.username }}</p>
       </div>

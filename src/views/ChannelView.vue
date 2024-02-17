@@ -7,11 +7,20 @@
         <h1 class="text-xl font-bold">
           {{ channelName }}
         </h1>
-        <button @click="addUser"
-                class="flex  justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          <i class="fa-solid fa-user-plus"></i>
-        </button>
+        <div class="flex">
+          <button @click="addUser"
+                  class="mr-2 justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <i class="fa-solid fa-user-plus"></i>
+          </button>
+          <button @click="deleteChannel"
+                  class="justify-center rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
       </div>
+
+
+
 
       <!-- Zone d'affichage des messages -->
       <div class="flex-grow overflow-auto p-4 space-y-4" ref="messageContainerRef">
@@ -202,6 +211,44 @@ const addUser = async () => {
     }
   });
 };
+
+const deleteChannel = async () => {
+  Swal.fire({
+    title: 'Êtes-vous sûr?',
+    text: "Vous ne pourrez pas revenir en arrière!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Oui, supprimez-le!'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const token = localStorage.getItem('token');
+      try {
+        await axios.delete(`http://localhost:3001/channels/${channelId.value}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        await Swal.fire(
+            'Supprimé!',
+            'Le canal a été supprimé.',
+            'success'
+        );
+        // Redirection ou mise à jour de l'interface ici
+      } catch (error) {
+        console.error("Erreur lors de la suppression du canal:", error);
+        await Swal.fire({
+          title: 'Erreur',
+          text: "Un problème est survenu lors de la suppression du canal",
+          icon: 'error',
+          confirmButtonText: 'Fermer'
+        });
+      }
+    }
+  });
+};
+
 
 
 /* WATCHERS */
