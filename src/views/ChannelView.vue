@@ -10,10 +10,12 @@
         <div class="flex">
           <button @click="addUser"
                   class="mr-2 justify-center rounded-md bg-[#4341C0] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Ajouter un utilisateur
             <i class="fa-solid fa-user-plus"></i>
           </button>
           <button @click="deleteChannel"
                   class="justify-center rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">
+            Supprimer le groupe
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
