@@ -106,7 +106,18 @@ function formatDate(timestamp) {
 const sendMessage = async () => { // Marquez la fonction comme async
   if (newMessage.value.trim() !== '') {
     if (newMessage.value[0] === '/') {
-      manageChatCommand(newMessage.value);
+      // Utilisez manageChatCommand pour traiter la commande
+      manageChatCommand(newMessage.value, 'none', (channels) => {
+        // Convertissez les canaux en un message système et affichez-le
+        const systemMessage = {
+          id: Date.now(), // Générez un ID unique pour le message
+          user: { id: 'system', username: 'Système' },
+          text: `Canaux disponibles: ${channels.map(channel => channel.name).join(', ')}`,
+          timestamp: new Date().toISOString()
+        };
+        messages.value.push(systemMessage);
+      });
+      newMessage.value = ''; // Réinitialiser le champ de texte après l'envoi
       return;
     }
     const messagePayload = {
