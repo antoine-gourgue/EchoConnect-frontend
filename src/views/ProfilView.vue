@@ -7,36 +7,39 @@
     <div class="flex flex-1 flex-col overflow-hidden">
       <div class="p-4 overflow-y-auto">
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-blue-600">Profile of {{ currentUsername }}</h2>
+          <h2 class="text-2xl font-bold text-indigo-600">Que veux-tu changer, mon ami {{ currentUsername }} ?</h2>
           <div class="mt-4 flex space-x-2">
             <img
               v-if="currentUser.imageUrl"
-              class="h-10 w-10 rounded-full border-2 border-blue-600"
+              class="h-10 w-10 rounded-full border-2 border-indigo-600"
               :src="currentUser.imageUrl"
               :alt="currentUser.imageUrl"
             />
             <div class="flex space-x-4">
-              <button @click="editMode = !editMode" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Edit Profile
+              <button @click="editMode = !editMode" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+                Met à jour ton profil
               </button>
               <button @click="deleteProfile" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                Delete Profile
+               Ou sinon Supprime le ici :)
               </button>
             </div>
           </div>
         </div>
         <div v-if="editMode" class="mb-8">
           <div class="grid gap-4">
-            <input v-model="editData.email" placeholder="Email" class="input" />
-            <button @click="updateEmail(currentUser.id)"  class="btn">Update Email</button>
+            <input v-model="editData.email" placeholder="Exemple : chachal@chacaux.hot" class="input" />
+            <button @click="updateEmail(currentUser.id)" class="btn bg-indigo-600" :disabled="!isValidEmail(editData.email)">Valide ton nouvel e-mail</button>
             <div class="mt-4">
-              <h3 class="text-lg ">Change Password</h3>
-              <input v-model="passwordData.oldPassword" type="password" placeholder="Old Password" class="input mt-2" />
-              <input v-model="passwordData.newPassword" type="password" placeholder="New Password" class="input mt-2" />
-              <input v-model="passwordData.confirmNewPassword" type="password" placeholder="Confirm New Password" class="input mt-2" />
-              <button @click="updatePassword(currentUser.id)" class="btn mt-2">Change Password</button>
+              <h3 class="text-lg ">Change ton mot de passe</h3>
+              <input v-model="passwordData.oldPassword" type="password" placeholder="Ancien mot de passe"  class="input mt-2" />
+              <input v-model="passwordData.newPassword" type="password" placeholder="Nouveau mot de passe" class="input mt-2" />
+              <input v-model="passwordData.confirmNewPassword" type="password" placeholder="Confirme ton nouveau mot de passe chacal" class="input mt-2" />
+              <button @click="updatePassword(currentUser.id)" class="btn mt-2 bg-indigo-600">Valide ton nouveau mot de passe</button>
             </div>
           </div>
+        </div>
+        <div v-for="message in userMessages" :key="message.id">
+          <p>{{ message.text }}</p>
         </div>
       </div>
     </div>
@@ -128,6 +131,7 @@ onMounted(() => {
   }).catch(error => {
     console.error('Erreur lors de la récupération des utilisateurs:', error);
   });
+  fetchUserMessages();
 });
 
 const socket = io('http://localhost:3001');
@@ -140,6 +144,22 @@ const onLogout = () => {
     localStorage.removeItem('user');
     router.push({ name: 'login' });
   }
+};
+const fetchUserMessages = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`http://localhost:3001/messages/user/${currentUser.value.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    userMessages.value = response.data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des messages de l\'utilisateur:', error);
+  }
+};
+const isValidEmail = (email) => {
+  return email && email.includes('@');
 };
 </script>
 
@@ -154,7 +174,6 @@ const onLogout = () => {
 .btn {
   padding: 0.5rem 1rem;
   color: white;
-  background-color: #4CAF50;
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
