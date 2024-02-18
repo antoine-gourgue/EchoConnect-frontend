@@ -51,7 +51,7 @@ const router = createRouter({
         },
         {
             path: '/profil',
-            name: 'Profil',
+            name: 'ProfileView',
             component: Profil,
             props: true
         },

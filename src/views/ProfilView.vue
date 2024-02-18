@@ -7,14 +7,22 @@
     <div class="flex flex-1 flex-col overflow-hidden">
       <div class="p-4 overflow-y-auto">
         <div class="mb-8">
-          <h2 class="text-2xl font-bold">Profile of {{ currentUsername }}</h2>
+          <h2 class="text-2xl font-bold text-blue-600">Profile of {{ currentUsername }}</h2>
           <div class="mt-4 flex space-x-2">
-            <button @click="editMode = !editMode" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Edit Profile
-            </button>
-            <button @click="deleteProfile" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-              Delete Profile
-            </button>
+            <img
+              v-if="currentUser.imageUrl"
+              class="h-10 w-10 rounded-full border-2 border-blue-600"
+              :src="currentUser.imageUrl"
+              :alt="currentUser.imageUrl"
+            />
+            <div class="flex space-x-4">
+              <button @click="editMode = !editMode" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Edit Profile
+              </button>
+              <button @click="deleteProfile" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Delete Profile
+              </button>
+            </div>
           </div>
         </div>
         <div v-if="editMode" class="mb-8">
@@ -27,7 +35,6 @@
               <input v-model="passwordData.newPassword" type="password" placeholder="New Password" class="input mt-2" />
               <input v-model="passwordData.confirmNewPassword" type="password" placeholder="Confirm New Password" class="input mt-2" />
               <button @click="updatePassword(currentUser.id)" class="btn mt-2">Change Password</button>
-
             </div>
           </div>
         </div>

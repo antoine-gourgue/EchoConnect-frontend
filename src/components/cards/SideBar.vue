@@ -145,8 +145,9 @@
             :alt="currentUser.imageUrl"
         />
         <p
-            v-else
-            class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+          v-else
+          class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold cursor-pointer"
+          @click="goToProfile">
           {{ currentUser.username.charAt(0).toUpperCase() }}
         </p>
       </div>
@@ -290,6 +291,10 @@ const fetchUserChannels = async () => {
 const goToCreateGroupChat = () => {
   router.push({ name: 'GeneralChat' });
 
+};
+
+const goToProfile = () => {
+  router.push({ name: 'ProfileView' });
 };
 </script>
 
