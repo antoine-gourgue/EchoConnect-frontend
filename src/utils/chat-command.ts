@@ -5,7 +5,7 @@
  * @param commandText Le texte de la commande entrée par l'utilisateur.
  * @param channelId L'ID du canal actuel.
  */
-export function manageChatCommand(commandText: string,  channelId: string) {
+export function manageChatCommand(commandText: string, channelId: string, callback: Function) {
     // Extraire la commande et le paramètre potentiel
     const parts = commandText.trim().split(/\s+/);
     const command = parts[0];
@@ -25,7 +25,7 @@ export function manageChatCommand(commandText: string,  channelId: string) {
             setNickname(arg);
             break;
         case '/list':
-            listChannels(arg); // Permet un argument optionnel pour /list
+            listChannels(arg).then(channels => callback(channels));
             break;
         case '/create':
             createChannel(arg);
@@ -64,8 +64,26 @@ function setNickname(nickname: string) {
     console.log(`Setting nickname to ${nickname}`);
 }
 
-function listChannels(filter?: string) {
+async function listChannels(filter?: string) {
     console.log(`Listing available channels with filter: ${filter}`);
+
+    // Construire l'URL avec un paramètre de requête pour le filtre, si présent
+    let url = 'http://localhost:3001/channels';
+    if (filter) {
+        url += `?filter=${encodeURIComponent(filter)}`;
+    }
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch channels');
+        }
+        const channels = await response.json();
+        return channels; // Retourne la liste des canaux pour une utilisation ultérieure
+    } catch (error) {
+        console.error("Error listing channels:", error);
+        throw error; // Propagez l'erreur pour la gérer plus loin dans l'UI, par exemple
+    }
 }
 
 function createChannel(channelName: string) {

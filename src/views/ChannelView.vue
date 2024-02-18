@@ -190,7 +190,7 @@ const formatDate = (timestamp) => {
 };
 
 const addUser = async () => {
-  Swal.fire({
+  const { value: userName } = await Swal.fire({
     title: 'Ajouter un utilisateur',
     input: 'text',
     inputLabel: 'Nom de l’utilisateur',
@@ -203,54 +203,65 @@ const addUser = async () => {
         return 'Vous devez écrire un nom!'
       }
     }
-  }).then(async (result) => {
-    if (result.isConfirmed && result.value) {
-      // Récupérez le token du localStorage
-      const token = localStorage.getItem('token');
+  });
 
-      try {
-        // Utilisez le token dans l'en-tête d'autorisation pour la recherche de l'utilisateur
-        const userSearchResponse = await axios.get(`http://localhost:3001/users/search?name=${result.value}`, {
+  if (userName) {
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await axios.get(`http://localhost:3001/users/search?name=${userName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const user = response.data[0];
+
+      if (user) {
+        await axios.put(`http://localhost:3001/channels/${channelId.value}/addMember/${user._id}`, {}, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        const userIdToAdd = userSearchResponse.data[0]?._id; // Prenez le premier utilisateur trouvé
 
+        const systemMessage = {
+          channelId: channelId.value,
+          senderId: 'system',
+          senderUsername: 'Système',
+          text: `${userName} a rejoint le canal.`,
+          timestamp: new Date().toISOString(),
+        };
 
-        if (userIdToAdd) {
-          // Utilisez également le token dans l'en-tête d'autorisation pour ajouter l'utilisateur au canal
-          await axios.put(`http://localhost:3001/channels/${channelId.value}/addMember/${userIdToAdd}`, {}, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-          await Swal.fire({
-            title: 'Succès',
-            text: "Utilisateur ajouté au canal avec succès",
-            icon: 'success',
-            confirmButtonText: 'Fermer'
-          });
-        } else {
-          await Swal.fire({
-            title: 'Erreur',
-            text: "Utilisateur non trouvé",
-            icon: 'error',
-            confirmButtonText: 'Fermer'
-          });
-        }
-      } catch (error) {
-        console.error("Erreur lors de l'ajout de l'utilisateur au canal:", error);
+        // Cette vérification s'assure que vous n'ajoutez le message système qu'une seule fois.
+        // Évitez d'envoyer le message système via Socket si vous le faites déjà côté serveur.
+        messages.value.push(systemMessage);
+
+        await Swal.fire({
+          title: 'Succès',
+          text: "Utilisateur ajouté au canal avec succès",
+          icon: 'success',
+          confirmButtonText: 'Fermer'
+        });
+      } else {
         await Swal.fire({
           title: 'Erreur',
-          text: "Un problème est survenu lors de l'ajout de l'utilisateur",
+          text: "Utilisateur non trouvé",
           icon: 'error',
           confirmButtonText: 'Fermer'
         });
       }
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'utilisateur au canal:", error);
+      await Swal.fire({
+        title: 'Erreur',
+        text: "Un problème est survenu lors de l'ajout de l'utilisateur",
+        icon: 'error',
+        confirmButtonText: 'Fermer'
+      });
     }
-  });
+  }
 };
+
 
 const deleteChannel = async () => {
   Swal.fire({
