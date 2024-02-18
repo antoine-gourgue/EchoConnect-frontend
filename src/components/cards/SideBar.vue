@@ -20,9 +20,23 @@
             </div>
           </div>
         </button>
-        <div v-if="showUsers" class="user-list">
-          <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative cursor-pointer" @click="goToPrivateMessage(user.username, user.userId)">
-            <img class="h-10 w-10 rounded-full" :src="user.image" :alt="user.name" />
+        <div class="user-list">
+          <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out" @click="goToPrivateMessage(user.username, user.userId)">
+            <!--    Avatar with imageUrl        -->
+
+            <img
+                v-if="user.imageUrl"
+                class="h-10 w-10 rounded-full"
+                :src="user.imageUrl"
+                :alt="user.username"
+            />
+
+            <p
+                v-else
+                class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+              {{ user.username.charAt(0).toUpperCase() }}
+            </p>
+
             <span v-if="user.isOnline" class="ml-2 h-3 w-3 rounded-full bg-green-500 border-2 border-white absolute bottom-0 left-5"></span>
             <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
               <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
@@ -46,16 +60,34 @@
           </div>
         </button>
 
-        <div v-if="showChannels" class="user-list">
+        <div
+            v-if="showChannels"
+            class="user-list">
           <RouterLink
               v-for="channel in channels"
               :key="channel.id"
-              class="group mb-2 flex items-center relative cursor-pointer"
+              class="group mb-2 flex items-center relative cursor-pointer
+                    hover:scale-105 transition-transform duration-300 ease-in-out"
               :to="{ name: 'Channel', params: { channelName: channel.name, channelId: channel.id } }"
           >
-            <p class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+
+
+            <!--    Avatar with imageUrl        -->
+
+            <img
+                v-if="channel.imageUrl"
+                class="h-10 w-10 rounded-full"
+                :src="channel.imageUrl"
+                :alt="channel.name"
+            />
+
+            <p
+                v-else
+                class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
               {{ channel.name.charAt(0).toUpperCase() }}
             </p>
+
+
             <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
               <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
                 <div class="absolute inset-0 -left-1 flex items-center">
@@ -106,29 +138,63 @@
             @click="onLogout">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
-        <button class="mt-2 rounded-full bg-gray-100" @click="toggleAvatarDisplay">
-          <img class="h-10 w-10 rounded-full" :src="currentUser.image" :alt="currentUser.name" />
-        </button>
+        <img
+            v-if="currentUser.imageUrl"
+            class="h-10 w-10 rounded-full"
+            :src="currentUser.imageUrl"
+            :alt="currentUser.imageUrl"
+        />
+        <p
+            v-else
+            class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+          {{ currentUser.username.charAt(0).toUpperCase() }}
+        </p>
       </div>
 
     </aside>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+<script lang="ts" setup>
+import {ref, onMounted, onUnmounted, watch} from 'vue';
+import type { Ref } from 'vue';
 import Swal from 'sweetalert2';
 import router from "@/router/index";
 import SocketService from "@/socket";
 import axios from "axios"; // Assurez-vous que l'URL correspond à votre serveur Socket.IO
-const channels = ref([]);
+
+type Channel = {
+  id: number;
+  name: string;
+  imageUrl: string;
+  createdBy: number;
+  members: number[];
+};
+
+/*  REFS */
+const channels: Ref<Channel[]> = ref([]);
 const users = ref([]); // Stocke les utilisateurs connectés
 const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
 const showChannels = ref(false);
-const emit = defineEmits(['logout'])
-
+const emit = defineEmits(['logout', 'update:openCreateChannelModal'])
 const currentUser = ref(JSON.parse(localStorage.getItem('user'|| '{}')));
 console.log('currentUser', currentUser.value)
+
+/* PROPS */
+const props = defineProps({
+  openCreateChannelModal: {
+    type: Boolean,
+    default: false
+  },
+})
+
+
+/* WATCHERS */
+watch(() => props.openCreateChannelModal, (value) => {
+  if (value) {
+    createChannel();
+  }
+});
 
 
 // Écouter les mises à jour de la liste des utilisateurs connectés
@@ -197,6 +263,8 @@ const createChannel = async () => {
       await Swal.fire('Erreur !', `Erreur lors de la création du canal: ${error.message}`, 'error');
     }
   }
+
+  emit('update:openCreateChannelModal', false);
 };
 
 
@@ -213,7 +281,7 @@ SocketService.socket?.on('channelCreationError', (error) => {
 
 const fetchUserChannels = async () => {
   try {
-    const { data } = await axios.get(`http://localhost:3001/channels/user/${currentUser.value.id}`);
+    const { data }: { data: Channel[] } = await axios.get(`http://localhost:3001/channels/user/${currentUser.value.id}`);
     channels.value = data;
   } catch (error) {
     console.error("Erreur lors de la récupération des canaux de l'utilisateur", error);
