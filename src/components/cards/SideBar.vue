@@ -20,7 +20,7 @@
             </div>
           </div>
         </button>
-        <div v-if="true" class="user-list">
+        <div v-if="showUsers" class="user-list">
           <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative cursor-pointer" @click="goToPrivateMessage(user.username, user.userId)">
             <img class="h-10 w-10 rounded-full" :src="user.image" :alt="user.name" />
             <span v-if="user.isOnline" class="ml-2 h-3 w-3 rounded-full bg-green-500 border-2 border-white absolute bottom-0 left-5"></span>
@@ -34,7 +34,7 @@
             </div>
           </div>
         </div>
-        <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600" @click="toggleUsersDisplay">
+        <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600" @click="toggleChannelsDisplay">
           <i class="fa-solid fa-user-group"></i>
           <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
             <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
@@ -46,7 +46,7 @@
           </div>
         </button>
 
-        <div class="user-list">
+        <div v-if="showChannels" class="user-list">
           <RouterLink
               v-for="channel in channels"
               :key="channel.id"
@@ -124,6 +124,7 @@ import axios from "axios"; // Assurez-vous que l'URL correspond à votre serveur
 const channels = ref([]);
 const users = ref([]); // Stocke les utilisateurs connectés
 const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
+const showChannels = ref(false);
 const emit = defineEmits(['logout'])
 
 const currentUser = ref(JSON.parse(localStorage.getItem('user'|| '{}')));
@@ -152,6 +153,10 @@ onUnmounted(() => {
 // Fonction pour basculer l'affichage des utilisateurs
 function toggleUsersDisplay() {
   showUsers.value = !showUsers.value;
+}
+
+function toggleChannelsDisplay() {
+  showChannels.value = !showChannels.value;
 }
 
 const onLogout = () => {
