@@ -2,6 +2,13 @@
   <div class="flex h-screen">
     <SideBar />
   <div class="flex flex-col h-screen w-full">
+    <div class="flex h-[5rem] items-center justify-between w-full border-b border-gray-200 p-4">
+    <div class="flex-grow text-center">
+      <h1 class="text-xl font-bold inline-block">
+        {{ route.params.username }}
+      </h1>
+    </div>
+  </div>
     <div class="flex-grow overflow-auto p-4 space-y-4 flex flex-col" ref="messageContainer">
       <div v-for="message in messages" :key="message.timestamp" class="flex" :class="{'justify-end': isMessageFromCurrentUser(message.senderUsername), 'justify-start': !isMessageFromCurrentUser(message.senderUsername)}">
         <div :class="{
