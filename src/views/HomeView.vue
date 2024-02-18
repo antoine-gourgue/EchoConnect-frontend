@@ -18,10 +18,10 @@ import {ref, onMounted, computed} from 'vue';
 import { io } from 'socket.io-client';
 import SideBar from "@/components/cards/SideBar.vue";
 import router from "@/router/index";
+import SocketService from "@/socket";
 
 const users = ref([]);
 
-const socket = io('http://localhost:3001');
 
 
 const currentUser = computed(() => {
@@ -29,7 +29,7 @@ const currentUser = computed(() => {
 });
 
 onMounted(() => {
-  socket.on('updateUserList', (updatedUsers) => {
+  SocketService.socket.on('updateUserList', (updatedUsers) => {
     console.log("passe")
     users.value = updatedUsers.map(user => ({
       id: user.userId, // Assurez-vous que cela correspond à ce que le serveur envoie
@@ -47,7 +47,7 @@ const onLogout = () => {
   console.log('PASSE', userConnected)
   if(userConnected){
     console.log('emit logout', userConnected.id)
-    socket.emit('logout', userConnected.id);
+    SocketService.socket.emit('logout', userConnected.id);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     router.push({ name: 'login' });
