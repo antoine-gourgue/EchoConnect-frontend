@@ -51,6 +51,7 @@ import axios from 'axios';
 import SideBar from "@/components/cards/SideBar.vue";
 import { useRouter } from 'vue-router';
 import { io } from 'socket.io-client'
+import Swal from "sweetalert2";
 const User = ref(JSON.parse(localStorage.getItem('user')));
 
 const router = useRouter();
@@ -74,16 +75,16 @@ const updateEmail = async (userId) => {
         'Authorization': `Bearer ${token}`
       }
     });
-    alert("Email mis à jour avec succès.");
+    await Swal.fire("Succès", "Email mis à jour avec succès.", "success");
   } catch (error) {
-    console.error('Échec de la mise à jour de l/email:', error);
-    alert("Échec de la mise à jour de l'email.");
+    console.error("Échec de la mise à jour de l'email:", error);
+    await Swal.fire("Erreur", "Échec de la mise à jour de l'email.", "error");
   }
 };
 
 const updatePassword = async (userId) => {
   if (passwordData.value.newPassword !== passwordData.value.confirmNewPassword) {
-    alert("Les mots de passe ne correspondent pas.");
+    await Swal.fire("Erreur", "Les mots de passe ne correspondent pas.", "error");
     return;
   }
   try {
@@ -93,46 +94,42 @@ const updatePassword = async (userId) => {
         'Authorization': `Bearer ${token}`
       }
     });
-    alert("Mot de passe mis à jour avec succès.");
+    await Swal.fire("Succès", "Mot de passe mis à jour avec succès.", "success");
   } catch (error) {
     console.error('Échec de la mise à jour du mot de passe:', error);
-    alert("Échec de la mise à jour du mot de passe.");
+    await Swal.fire("Erreur", "Échec de la mise à jour du mot de passe.", "error");
   }
 };
 
 const deleteProfile = async () => {
-  const confirmation = window.confirm("Mais non ! Es-tu sûr de vouloir nous quitter ??");
-  if (!confirmation) {
-    return;
-  }
-  try {
-    const token = localStorage.getItem('token');
-    await axios.delete(`http://localhost:3001/users/${currentUser.value.id}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+  Swal.fire({
+    title: "Êtes-vous sûr?",
+    text: "Mais non ! Es-tu sûr de vouloir nous quitter ??",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Oui, supprime-le!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`http://localhost:3001/users/${currentUser.value.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        await Swal.fire("Supprimé!", "Profil supprimé avec succès.", "success");
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        await router.push({name: 'login'});
+      } catch (error) {
+        console.error('Échec de la suppression du profil:', error);
+        await Swal.fire("Erreur", "Échec de la suppression du profil.", "error");
       }
-    });
-    alert("Profil supprimé avec succès.");
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push({ name: 'login' });
-  } catch (error) {
-    console.error('Échec de la suppression du profil:', error);
-    alert("Échec de la suppression du profil.");
-  }
-};
-onMounted(() => {
-  axios.get('http://localhost:3001/users', {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
     }
-  }).then(response => {
-    users.value = response.data;
-  }).catch(error => {
-    console.error('Erreur lors de la récupération des utilisateurs:', error);
   });
-  fetchUserMessages();
-});
+};
 
 const socket = io('http://localhost:3001');
 const onLogout = () => {
