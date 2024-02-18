@@ -1,24 +1,42 @@
 <template>
+  <link href='https://fonts.googleapis.com/css?family=Fredoka+One' rel='stylesheet'>
   <div class="flex bg-gray-100 text-gray-900">
     <aside class="flex h-screen w-20 flex-col items-center border-r border-gray-200 bg-white">
       <div class="flex h-[4.5rem] w-full items-center justify-center border-b border-gray-200 p-2">
-        <img src="/EchoConnectLogo.png" alt="Echo Connect Logo" />
+        <router-link to="/home" class="text-2xl font-fredoka text-indigo-600 no-underline">
+          <h1>E.C</h1>
+        </router-link>
+
       </div>
       <nav class="flex flex-1 flex-col gap-y-4 pt-10">
         <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600 " @click="toggleUsersDisplay">
           <i class="fa-solid fa-message"></i>
           <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
-  <span class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
-    <span class="absolute inset-0 -left-1 flex items-center">
-      <span class="h-2 w-2 rotate-45 bg-white"></span>
-    </span>
-    Messages privés
-  </span>
+            <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
+              <div class="absolute inset-0 -left-1 flex items-center">
+                <div class="h-2 w-2 rotate-45 bg-white"></div>
+              </div>
+              Messages privés
+            </div>
           </div>
         </button>
-        <div v-if="true" class="user-list">
-          <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative cursor-pointer" @click="goToPrivateMessage(user.username, user.userId)">
-            <img class="h-10 w-10 rounded-full" :src="user.image" :alt="user.name" />
+        <div class="user-list">
+          <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out" @click="goToPrivateMessage(user.username, user.userId)">
+            <!--    Avatar with imageUrl        -->
+
+            <img
+                v-if="user.imageUrl"
+                class="h-10 w-10 rounded-full"
+                :src="user.imageUrl"
+                :alt="user.username"
+            />
+
+            <p
+                v-else
+                class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+              {{ user.username.charAt(0).toUpperCase() }}
+            </p>
+
             <span v-if="user.isOnline" class="ml-2 h-3 w-3 rounded-full bg-green-500 border-2 border-white absolute bottom-0 left-5"></span>
             <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
               <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
@@ -30,7 +48,7 @@
             </div>
           </div>
         </div>
-        <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600" @click="toggleUsersDisplay">
+        <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600" @click="toggleChannelsDisplay">
           <i class="fa-solid fa-user-group"></i>
           <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
             <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
@@ -42,11 +60,34 @@
           </div>
         </button>
 
-        <div v-if="true" class="user-list">
-          <div v-for="channel in channels" :key="channel.id" class="group mb-2 flex items-center relative cursor-pointer" @click="goToChannel(channel.name, channel._id)">
-            <p class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+        <div
+            v-if="showChannels"
+            class="user-list">
+          <RouterLink
+              v-for="channel in channels"
+              :key="channel.id"
+              class="group mb-2 flex items-center relative cursor-pointer
+                    hover:scale-105 transition-transform duration-300 ease-in-out"
+              :to="{ name: 'Channel', params: { channelName: channel.name, channelId: channel.id } }"
+          >
+
+
+            <!--    Avatar with imageUrl        -->
+
+            <img
+                v-if="channel.imageUrl"
+                class="h-10 w-10 rounded-full"
+                :src="channel.imageUrl"
+                :alt="channel.name"
+            />
+
+            <p
+                v-else
+                class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
               {{ channel.name.charAt(0).toUpperCase() }}
             </p>
+
+
             <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
               <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
                 <div class="absolute inset-0 -left-1 flex items-center">
@@ -55,7 +96,7 @@
                 {{ channel.name}}
               </div>
             </div>
-          </div>
+          </RouterLink>
         </div>
 
         <button @click="createChannel" class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600">
@@ -97,31 +138,63 @@
             @click="onLogout">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
-<!--        <button class="mt-2 rounded-full bg-gray-100" @click="toggleAvatarDisplay">
-          <img class="h-10 w-10 rounded-full" :src="currentUser.image" :alt="currentUser.name" />
-        </button>-->
-        <button class="mt-2 rounded-full bg-gray-100" @click="navigateToProfile">
-          <img class="h-10 w-10 rounded-full" src="https://avatars.githubusercontent.com/u/35387401?v=4" alt="" />
-        </button>
+        <img
+            v-if="currentUser.imageUrl"
+            class="h-10 w-10 rounded-full"
+            :src="currentUser.imageUrl"
+            :alt="currentUser.imageUrl"
+        />
+        <p
+            v-else
+            class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold">
+          {{ currentUser.username.charAt(0).toUpperCase() }}
+        </p>
       </div>
 
     </aside>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+<script lang="ts" setup>
+import {ref, onMounted, onUnmounted, watch} from 'vue';
+import type { Ref } from 'vue';
 import Swal from 'sweetalert2';
 import router from "@/router/index";
 import SocketService from "@/socket";
-import axios from "axios";
-const channels = ref([]);
-const users = ref([]);
-const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
-const emit = defineEmits(['logout'])
+import axios from "axios"; // Assurez-vous que l'URL correspond à votre serveur Socket.IO
 
+type Channel = {
+  id: number;
+  name: string;
+  imageUrl: string;
+  createdBy: number;
+  members: number[];
+};
+
+/*  REFS */
+const channels: Ref<Channel[]> = ref([]);
+const users = ref([]); // Stocke les utilisateurs connectés
+const showUsers = ref(false); // Contrôle l'affichage de la liste des utilisateurs
+const showChannels = ref(false);
+const emit = defineEmits(['logout', 'update:openCreateChannelModal'])
 const currentUser = ref(JSON.parse(localStorage.getItem('user'|| '{}')));
 console.log('currentUser', currentUser.value)
+
+/* PROPS */
+const props = defineProps({
+  openCreateChannelModal: {
+    type: Boolean,
+    default: false
+  },
+})
+
+
+/* WATCHERS */
+watch(() => props.openCreateChannelModal, (value) => {
+  if (value) {
+    createChannel();
+  }
+});
 
 
 // Écouter les mises à jour de la liste des utilisateurs connectés
@@ -129,7 +202,7 @@ onMounted(() => {
   SocketService.socket?.on('updateUserList', (updatedUsers) => {
     // S'assurer que l'on filtre en utilisant le bon champ d'identifiant pour les utilisateurs
     users.value = updatedUsers.filter(user => user.userId !== currentUser.value.id); // Assurez-vous que 'id' est le bon champ
-    console.log("Liste des utilisateurs mise à jour sans l'utilisateur courant", users.value);
+    // console.log("Liste des utilisateurs mise à jour sans l'utilisateur courant", users.value);
   });
 
   fetchUserChannels();
@@ -148,24 +221,17 @@ function toggleUsersDisplay() {
   showUsers.value = !showUsers.value;
 }
 
+function toggleChannelsDisplay() {
+  showChannels.value = !showChannels.value;
+}
+
 const onLogout = () => {
   emit('logout')
 }
-const navigateToProfile = () => {
-  router.push({ name: 'Profil' });
-};
 
 
 const goToPrivateMessage = (username,userId) => {
   router.push({ name: 'PrivateMessage', params: { username, userId } });
-};
-
-const goToChannel = (channelName, id) => {
-  if (!channelName) {
-    console.error("Le nom du canal est manquant");
-    return; // Empêcher la navigation si le nom du canal est manquant
-  }
-  router.push({ name: 'Channel', params: { channelName, id } });
 };
 
 
@@ -197,6 +263,8 @@ const createChannel = async () => {
       await Swal.fire('Erreur !', `Erreur lors de la création du canal: ${error.message}`, 'error');
     }
   }
+
+  emit('update:openCreateChannelModal', false);
 };
 
 
@@ -213,7 +281,7 @@ SocketService.socket?.on('channelCreationError', (error) => {
 
 const fetchUserChannels = async () => {
   try {
-    const { data } = await axios.get(`http://localhost:3001/channels/user/${currentUser.value.id}`);
+    const { data }: { data: Channel[] } = await axios.get(`http://localhost:3001/channels/user/${currentUser.value.id}`);
     channels.value = data;
   } catch (error) {
     console.error("Erreur lors de la récupération des canaux de l'utilisateur", error);
@@ -221,6 +289,7 @@ const fetchUserChannels = async () => {
 };
 const goToCreateGroupChat = () => {
   router.push({ name: 'GeneralChat' });
+
 };
 </script>
 

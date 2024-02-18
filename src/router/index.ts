@@ -23,6 +23,11 @@ const router = createRouter({
             component: RegisterView
         },
         {
+            path: '/',
+            name: 'index',
+            component: HomeView
+        },
+        {
             path: '/home',
             name: 'home',
             component: HomeView
@@ -39,7 +44,7 @@ const router = createRouter({
             component: CreateGroupChatForm
         },
         {
-            path: '/chanel/:channelName/:id',
+            path: '/channel/:channelName/:channelId',
             name: 'Channel',
             component: ChannelView,
             props: true
