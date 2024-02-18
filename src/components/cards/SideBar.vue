@@ -20,7 +20,7 @@
             </div>
           </div>
         </button>
-        <div class="user-list">
+        <div v-if="showUsers" class="user-list">
           <div v-for="user in users" :key="user.id" class="group mb-2 flex items-center relative cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out" @click="goToPrivateMessage(user.username, user.userId)">
             <!--    Avatar with imageUrl        -->
 
