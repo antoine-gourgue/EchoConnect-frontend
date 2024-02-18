@@ -3,8 +3,9 @@
 /**
  * Gère les commandes du chat en fonction du texte entré par l'utilisateur.
  * @param commandText Le texte de la commande entrée par l'utilisateur.
+ * @param channelId L'ID du canal actuel.
  */
-export function manageChatCommand(commandText: string) {
+export function manageChatCommand(commandText: string,  channelId: string) {
     // Extraire la commande et le paramètre potentiel
     const parts = commandText.trim().split(/\s+/);
     const command = parts[0];
@@ -39,7 +40,7 @@ export function manageChatCommand(commandText: string) {
             quitChannel(arg);
             break;
         case '/users':
-            listChannelUsers();
+            listChannelUsers(channelId);
             break;
         case '/msg': {
             // Pour /msg, l'argument doit être divisé en nickname et message
@@ -83,8 +84,21 @@ function quitChannel(channelName: string) {
     console.log(`Quitting channel: ${channelName}`);
 }
 
-function listChannelUsers() {
-    console.log("Listing users in the current channel");
+export async function listChannelUsers(channelId: string): Promise<any[]> {
+    console.log(`Listing users in channel: ${channelId}`);
+
+    try {
+        const response = await fetch(`http://localhost:3001/channels/${channelId}/members`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch channel members');
+        }
+        const members = await response.json();
+        console.log(members);
+        return members; // Retourne les membres
+    } catch (error) {
+        console.error("Error listing channel members:", error);
+        throw error; // Propagez l'erreur pour la gérer plus loin
+    }
 }
 
 function sendPrivateMessage(nickname: string, message: string) {
