@@ -2,7 +2,7 @@
   <div class="flex h-screen">
     <SideBar />
   <div class="flex flex-col h-screen w-full">
-    <div class="flex h-[5rem] items-center justify-between w-full border-b border-gray-200 p-4">
+    <div class="flex h-[4.5rem] items-center justify-between w-full border-b border-gray-200 p-4">
     <div class="flex-grow text-center">
       <h1 class="text-xl font-bold inline-block">
         {{ route.params.username }}

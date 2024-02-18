@@ -133,25 +133,38 @@
       </nav>
 
       <div class="flex flex-col items-center gap-y-4 py-10">
-        <button
-            class="group relative rounded-xl p-2 text-gray-600 hover:text-indigo-600"
-            @click="onLogout">
+        <button class="group relative rounded-xl p-2 text-gray-600 hover:text-indigo-600" @click="onLogout">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
-        <img
-            v-if="currentUser.imageUrl"
-            class="h-10 w-10 rounded-full cursor-pointer"
-            :src="currentUser.imageUrl"
-            :alt="currentUser.imageUrl"
-            @click="goToProfile"
-        />
-        <p
-          v-else
-          class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold cursor-pointer"
-          @click="goToProfile">
-          {{ currentUser.username.charAt(0).toUpperCase() }}
-        </p>
+
+        <!-- Englobez l'image et le tooltip dans un div parent -->
+        <div class="group relative"> <!-- Utilisez relative ici pour positionner absolument le tooltip par rapport à ce div -->
+          <img
+              v-if="currentUser.imageUrl"
+              class="h-10 w-10 rounded-full cursor-pointer border-2 border-transparent hover:border-indigo-600"
+              :src="currentUser.imageUrl"
+              :alt="currentUser.imageUrl"
+              @click="goToProfile"
+          />
+          <p
+              v-else
+              class="h-10 w-10 rounded-full border flex justify-center items-center bg-gray-200 text-gray-800 font-semibold cursor-pointer"
+              @click="goToProfile">
+            {{ currentUser.username.charAt(0).toUpperCase() }}
+          </p>
+
+          <!-- Tooltip pour le profil -->
+          <div class="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
+            <div class="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 drop-shadow-lg">
+              <div class="absolute inset-0 -left-1 flex items-center">
+                <div class="h-2 w-2 rotate-45 bg-white"></div>
+              </div>
+              Profil
+            </div>
+          </div>
+        </div>
       </div>
+
 
     </aside>
   </div>
