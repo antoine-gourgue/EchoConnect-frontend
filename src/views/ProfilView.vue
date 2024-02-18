@@ -98,6 +98,10 @@ const updatePassword = async (userId) => {
 };
 
 const deleteProfile = async () => {
+  const confirmation = window.confirm("Mais non ! Es-tu sûr de vouloir nous quitter ??");
+  if (!confirmation) {
+    return;
+  }
   try {
     const token = localStorage.getItem('token');
     await axios.delete(`http://localhost:3001/users/${currentUser.value.id}`, {
@@ -114,7 +118,6 @@ const deleteProfile = async () => {
     alert("Échec de la suppression du profil.");
   }
 };
-
 onMounted(() => {
   axios.get('http://localhost:3001/users', {
     headers: {

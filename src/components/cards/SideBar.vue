@@ -140,9 +140,10 @@
         </button>
         <img
             v-if="currentUser.imageUrl"
-            class="h-10 w-10 rounded-full"
+            class="h-10 w-10 rounded-full cursor-pointer"
             :src="currentUser.imageUrl"
             :alt="currentUser.imageUrl"
+            @click="goToProfile"
         />
         <p
           v-else
