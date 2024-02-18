@@ -28,7 +28,7 @@
 
           <button
               @click="openCreateChannelModal = true"
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              class="relative flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#4341C0] hover:bg-indigo-700 focus:outline-none">
             Créer mon premier salon
           </button>
         </div>
