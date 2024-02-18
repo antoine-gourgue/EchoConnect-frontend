@@ -1,8 +1,12 @@
 <template>
+  <link href='https://fonts.googleapis.com/css?family=Fredoka+One' rel='stylesheet'>
   <div class="flex bg-gray-100 text-gray-900">
     <aside class="flex h-screen w-20 flex-col items-center border-r border-gray-200 bg-white">
       <div class="flex h-[4.5rem] w-full items-center justify-center border-b border-gray-200 p-2">
-        <img src="/EchoConnectLogo.png" />
+        <router-link to="/home" class="text-2xl font-fredoka text-indigo-600 no-underline">
+          <h1>E.C</h1>
+        </router-link>
+
       </div>
       <nav class="flex flex-1 flex-col gap-y-4 pt-10">
         <button class="group relative rounded-xl bg-gray-100 p-2 text-gray-600 hover:text-indigo-600 " @click="toggleUsersDisplay">

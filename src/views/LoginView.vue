@@ -1,4 +1,5 @@
 <template>
+  <link href='https://fonts.googleapis.com/css?family=Fredoka+One' rel='stylesheet'>
   <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <h2 class="font-fredoka font-semibold grid justify-items-center text-[#4341C0] text-4xl">
